@@ -2,6 +2,7 @@ using EventPlus.WebAPI.BdContextEvent;
 using EventPlus.WebAPI.Interfaces;
 using EventPlus.WebAPI.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +16,51 @@ builder.Services.AddOpenApi();
 
 //Registrar as  Repositories (Injecao de Dependencia
 builder.Services.AddScoped<ITipoEventoRepository, TipoEventoRepository>();
+builder.Services.AddScoped<ITipoUsuarioRepository, TipoUsuarioRepository>();  
+builder.Services.AddScoped<IInstituicaoRepository, InstituicaoRepository>();
+builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+builder.Services.AddScoped<IEventoRepository, EventoRepository>();
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+//Adiciona o serviço de autenticação JWT Bearer (forma de autenticação)
+object valeu = builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = "JwtBearer";
+    options.DefaultChallengeScheme = "JwtBearer";
+})
+    .AddJwtBearer("JwtBearer", options =>
+
+
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            //valida quem está solicitando
+            ValidateIssuer = true,
+
+            //valida quem está recebendo
+            ValidateAudience = true,
+
+            //define se o tempo de expiração será validado
+            ValidateLifetime = true,
+
+            //forma de criptografia e valida a chave de autenticação
+            IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes("filmes-chave-autenticacao-webapi-dev")),
+
+            //valida o tempo de expiração do token
+            ClockSkew = TimeSpan.FromMinutes(5),
+
+            //nome do issuer (de onde está vindo)
+            ValidIssuer = "api_event",
+
+            //nome do audience (para onde ele está indo)
+            ValidAudience = "api_event"
+        };
+    });
+
+//////////////////////////////////////////////////////////////////////////////////////
+
+
 
 // adiciona Swagger
 builder.Services.AddEndpointsApiExplorer();
@@ -31,8 +77,8 @@ builder.Services.AddSwaggerGen(options =>
         Name = "Paulo André",
         Url = new Uri("https://www.linkedin.com/in/marcaumdev")
     },
-        License = new OpenApiLicense
-        {
+        License = new OpenApiLicense  
+        {   
             Name = "Exemplo de licensa",
             Url = new Uri("https://opensource.org/licenses/MIT")        
         }

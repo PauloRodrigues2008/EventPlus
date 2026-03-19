@@ -30,5 +30,5 @@ public partial class Instituicao
     [InverseProperty("IdInstituicaoNavigation")]
     [JsonIgnore]
     public virtual ICollection<Evento> Eventos { get; set; } = new List<Evento>();
-
+   
 }
