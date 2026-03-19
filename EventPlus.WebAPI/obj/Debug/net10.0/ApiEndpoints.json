@@ -341,7 +341,7 @@
     "Parameters": [
       {
         "Name": "usuario",
-        "Type": "EventPlus.WebAPI.Models.Usuario",
+        "Type": "EventPlus.WebAPI.DTO.UsuarioDTO",
         "IsRequired": true
       }
     ],
