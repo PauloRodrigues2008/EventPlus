@@ -1,3 +1,4 @@
+using Azure.AI.ContentSafety;
 using EventPlus.WebAPI.BdContextEvent;
 using EventPlus.WebAPI.Interfaces;
 using EventPlus.WebAPI.Repositories;
@@ -7,7 +8,16 @@ using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddDbContext<EventContext>(options => options.UseSqlServer
+var endpoint = "https://moderatorservice-marcos.cognitiveservices.azure.com/";
+var apiKey = "";
+
+var client = new ContentSafetyClient(new Uri(endpoint),
+    new Azure.AzureKeyCredential
+    (apiKey)) ;
+builder.Services.AddSingleton(client);  
+
+builder.Services.AddDbContext<EventContext>(
+    options => options.UseSqlServer
     (builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddControllers();
@@ -20,6 +30,9 @@ builder.Services.AddScoped<ITipoUsuarioRepository, TipoUsuarioRepository>();
 builder.Services.AddScoped<IInstituicaoRepository, InstituicaoRepository>();
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IEventoRepository, EventoRepository>();
+builder.Services.AddScoped<IPresencaRepository, PresencaRepository>();  
+builder.Services.AddScoped<IComentarioEventoRepository, ComentarioEventoRepository>();
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 

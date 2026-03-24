@@ -1,4 +1,5 @@
 ﻿using EventPlus.WebAPI.BdContextEvent;
+using EventPlus.WebAPI.DTO;
 using EventPlus.WebAPI.Interfaces;
 using EventPlus.WebAPI.Models;
 using EventPlus.WebAPI.Utils;
@@ -6,71 +7,69 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EventPlus.WebAPI.Repositories;
 
-    public class UsuarioRepository : IUsuarioRepository
-    {
+public class UsuarioRepository : IUsuarioRepository
+{
     private readonly EventContext _context;
 
-    //Métedo construtor que aplica a injeção de dependência
-
+    //Método construtor que aplica a injeção de dependência
     public UsuarioRepository(EventContext context)
     {
         _context = context;
     }
 
-
     /// <summary>
     /// Busca o usuário pelo e-mail e valida o hash da senha
     /// </summary>
-    /// <param name="Email"> Email do usuário a ser buscado</param>
+    /// <param name="Email">Email do usuário a ser buscado</param>
     /// <param name="Senha">Senha para validar o usuário</param>
     /// <returns>Usuário buscado</returns>
     public Usuario BuscarPorEmailESenha(string Email, string Senha)
     {
-        // primeiro buscados o usuário pelo email
-        var usuarioBuscado = _context.Usuarios
-            .Include(usuario => usuario.IdTipoUsuarioNavigation)
+        //Primeiro, buscamos o usuário pelo e-mail
+        var usuarioBuscado = _context.Usuarios.Include(usuario => usuario.IdTipoUsuarioNavigation)
             .FirstOrDefault(usuario => usuario.Email == Email);
 
-        // Verificamos se o usuario foi encontrado
+        //Verificamos se o usuário for encontrado
         if (usuarioBuscado != null)
-
         {
-            // Comparamps o hash da senha fornecida com o hash armazenado no banco de dados
+            //Comparamos o hash da senha digitada com o que está no banco
             bool confere = Criptografia.CompararHash(Senha, usuarioBuscado.Senha);
+
             if (confere)
             {
                 return usuarioBuscado;
             }
-            
         }
-        return null!;
 
+        return null!;
     }
 
     /// <summary>
-    /// Busca um úsuario por id, incluindo a navegação para o tipo 
+    /// Busca um usuário pelo id, incluindo os dados do Tipo de Usuário
     /// </summary>
-    /// <param name="id"> id do usuário a ser buscado</param>
-    /// <returns>Usuário Buscado e seu tipo de usuário</returns>
-
-
+    /// <param name="id">id do usuário a ser buscado</param>
+    /// <returns>Usuário buscado e seu tipo de usuário</returns>
     public Usuario BuscarPorId(Guid id)
     {
-        return _context.Usuarios
-              .Include(usuario => usuario.IdTipoUsuarioNavigation)
-              .FirstOrDefault(usuario => usuario.IdUsuario == id)!;
+        return _context.Usuarios.Include(usuario => usuario.IdTipoUsuarioNavigation)
+            .FirstOrDefault(usuario => usuario.IdUsuario == id)!;
     }
 
     /// <summary>
-    /// Cadastra um novo usuário. A senha criptografia  e o Id gerado pelo banco
+    /// Cadastra um novo usuário. A senha é criptografada e o Id gerado pelo banco
     /// </summary>
-    /// <param name="usuario"> Usuario a ser cadastrado</param>
-
+    /// <param name="usuario">Usuário a ser cadastrado</param>
     public void Cadastrar(Usuario usuario)
     {
-        usuario. Senha = Criptografia.GerarHash(usuario.Senha);
+        usuario.Senha = Criptografia.GerarHash(usuario.Senha);
+
         _context.Usuarios.Add(usuario);
-        _context.SaveChanges( );
+        _context.SaveChanges();
+    }
+
+    public List<Usuario> Listar()
+    {
+        return _context.Usuarios.OrderBy(Usuario => Usuario.Nome).ToList();
     }
 }
 

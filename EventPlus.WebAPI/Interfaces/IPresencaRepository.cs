@@ -8,7 +8,7 @@ namespace EventPlus.WebAPI.Interfaces;
     void Deletar(Guid id);
     List<Presenca> Listar();
     Presenca BuscarPorId(Guid id);  
-    void Atuaizar(Guid id);
+    void Atualizar(Guid id, Presenca presenca);
     List<Presenca> ListarMinhas(Guid IdUsuario);
     }
 
